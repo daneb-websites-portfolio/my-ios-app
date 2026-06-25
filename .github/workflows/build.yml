@@ -8,46 +8,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Extract iOS Project
+      - name: Compile Native Web App
         run: |
-          unzip -o ios.zip -d .
-          
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install Dependencies
-        run: |
-          npm install @capacitor/core @capacitor/ios
-
-      - name: Compile App Archive
-        run: |
-          # Find where App.xcworkspace is located dynamically
-          WORKSPACE_PATH=$(find . -name "App.xcworkspace" | head -n 1)
-          PROJECT_DIR=$(dirname "$WORKSPACE_PATH")
-          echo "Found workspace at: $WORKSPACE_PATH"
-          echo "Project directory is: $PROJECT_DIR"
-          
-          cd "$PROJECT_DIR"
-          xcodebuild archive \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -destination 'generic/platform=iOS' \
-            -archivePath "$PWD/build/App.xcarchive" \
-            -clonedSourcePackagesDirPath "$PWD/build/spm" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE_SPECIFIER=""
+          mkdir -p build/App.app
+          xcrun -sdk iphoneos swiftc App.swift \
+            -target arm64-apple-ios15.0 \
+            -o build/App.app/App \
+            -Xlinker -rpath -Xlinker /usr/lib/swift
+            
+          # Create mandatory minimal application files
+          echo '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com"><plist version="1.0"><dict><key>CFBundleExecutable</key><string>App</string><key>CFBundleIdentifier</key><string>com.example.netplay</string><key>CFBundleName</key><string>Netplay</string><key>CFBundleVersion</key><string>1</string><key>CFBundleShortVersionString</key><string>1.0</string></dict></plist>' > build/App.app/Info.plist
 
       - name: Package App to IPA
         run: |
-          WORKSPACE_PATH=$(find . -name "App.xcworkspace" | head -n 1)
-          PROJECT_DIR=$(dirname "$WORKSPACE_PATH")
-          
           mkdir -p Payload
-          cp -r "$PROJECT_DIR/build/App.xcarchive/Products/Applications/App.app" Payload/
+          cp -r build/App.app Payload/
           zip -r App.ipa Payload
 
       - name: Upload IPA Artifact

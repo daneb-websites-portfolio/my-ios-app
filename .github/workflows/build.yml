@@ -10,15 +10,19 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest
+
     - name: Compile Swift Code
       run: |
-        # Creates a valid application bundle directory structure
         mkdir -p build/Payload/App.app
         
-        # Compiles the raw App.swift into a native iOS arm64 binary
-        swiftc -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
+        # Locates the correct iOS SDK paths and compiles the binary
+        xcrun --sdk iphoneos swiftc -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
         
-        # Generates a basic mandatory configuration file required by Sideloadly
+        # Generates the mandatory structure file
         cat <<EOF > build/Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

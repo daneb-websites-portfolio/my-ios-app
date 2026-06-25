@@ -21,8 +21,8 @@ class ViewController: UIViewController {
         
         self.view.addSubview(webView)
         
-        // 4. Point the app to your website or stream URL (Replace with your actual URL)
-        if let url = URL(string: "https://google.com") {
+        // 4. Point the app to your streaming platform
+        if let url = URL(string: "https://netplayz.top") {
             let request = URLRequest(url: url)
             webView.load(request)
         }

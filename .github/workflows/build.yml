@@ -1,4 +1,4 @@
-name: Compile Swift to IPA
+name: Compile GoRate to IPA
 on:
   push:
     branches: [ main ]
@@ -18,19 +18,17 @@ jobs:
     - name: Process App Icon
       run: |
         mkdir -p Payload/App.app
-        # If your icon image is in your repository as 2503508.png, copy it to the app bundle
-        if [ -f "2503508.png" ]; then
-          cp 2503508.png Payload/App.app/AppIcon.png
-        elif [ -f "AppIcon.png" ]; then
-          cp AppIcon.png Payload/App.app/AppIcon.png
+        # Maps the newly uploaded currency image to the application bundle asset path
+        if [ -f "8608723.png" ]; then
+          cp 8608723.png Payload/App.app/AppIcon.png
         fi
 
     - name: Compile and Bundle App
       run: |
-        # Compile the binary with optimization flags for fluid video playback
+        # Compile native SwiftUI target architecture without template scaffolding
         xcrun --sdk iphoneos swiftc -O -parse-as-library -target arm64-apple-ios14.0 App.swift -o Payload/App.app/App
         
-        # Generate full-screen metadata configurations
+        # Inject custom metadata descriptors for GoRate
         cat <<EOF > Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -39,11 +37,11 @@ jobs:
             <key>CFBundleExecutable</key>
             <string>App</string>
             <key>CFBundleIdentifier</key>
-            <string>com.ai.netplay</string>
+            <string>com.daneb.gorate</string>
             <key>CFBundleName</key>
-            <string>Netplay</string>
+            <string>GoRate</string>
             <key>CFBundleDisplayName</key>
-            <string>Netplay</string>
+            <string>GoRate</string>
             <key>CFBundleShortVersionString</key>
             <string>1.0</string>
             <key>CFBundleVersion</key>
@@ -59,8 +57,6 @@ jobs:
             <key>UISupportedInterfaceOrientations</key>
             <array>
                 <string>UIInterfaceOrientationPortrait</string>
-                <string>UIInterfaceOrientationLandscapeLeft</string>
-                <string>UIInterfaceOrientationLandscapeRight</string>
             </array>
         </dict>
         </plist>

@@ -1,33 +1,52 @@
-name: Build iOS IPA
-on: [push, workflow_dispatch]
+name: Compile Swift to IPA
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Compile Native Web App
-        run: |
-          mkdir -p build/App.app
-          xcrun -sdk iphoneos swiftc App.swift \
-            -target arm64-apple-ios15.0 \
-            -parse-as-library \
-            -o build/App.app/App \
-            -Xlinker -rpath -Xlinker /usr/lib/swift
-            
-          # Create mandatory minimal application files
-          echo '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com"><plist version="1.0"><dict><key>CFBundleExecutable</key><string>App</string><key>CFBundleIdentifier</key><string>com.example.netplay</string><key>CFBundleName</key><string>Netplay</string><key>CFBundleVersion</key><string>1</string><key>CFBundleShortVersionString</key><string>1.0</string></dict></plist>' > build/App.app/Info.plist
+    - name: Compile Swift Code
+      run: |
+        # Creates a valid application bundle directory structure
+        mkdir -p build/Payload/App.app
+        
+        # Compiles the raw App.swift into a native iOS arm64 binary
+        swiftc -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
+        
+        # Generates a basic mandatory configuration file required by Sideloadly
+        cat <<EOF > build/Payload/App.app/Info.plist
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key>
+            <string>App</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.ai.myiosapp</string>
+            <key>CFBundleName</key>
+            <string>MyAIApp</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0</string>
+            <key>CFBundleVersion</key>
+            <string>1</string>
+            <key>LSRequiresIPhoneOS</key>
+            <true/>
+        </dict>
+        </plist>
+        EOF
 
-      - name: Package App to IPA
-        run: |
-          mkdir -p Payload
-          cp -r build/App.app Payload/
-          zip -r App.ipa Payload
-
-      - name: Upload IPA Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: my-app-ipa
-          path: App.ipa
+    - name: Compress into IPA Artifact
+      run: |
+        cd build
+        zip -r ../CompiledApp.ipa Payload
+        
+    - name: Upload Working IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-App
+        path: CompiledApp.ipa

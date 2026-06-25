@@ -18,17 +18,15 @@ jobs:
     - name: Process App Icon
       run: |
         mkdir -p Payload/App.app
-        # Maps the newly uploaded currency image to the application bundle asset path
         if [ -f "8608723.png" ]; then
           cp 8608723.png Payload/App.app/AppIcon.png
         fi
 
     - name: Compile and Bundle App
       run: |
-        # Compile native SwiftUI target architecture without template scaffolding
-        xcrun --sdk iphoneos swiftc -O -parse-as-library -target arm64-apple-ios14.0 App.swift -o Payload/App.app/App
+        # Target modified to iOS 15+ compilation flags to resolve modifier availability errors
+        xcrun --sdk iphoneos swiftc -O -parse-as-library -target arm64-apple-ios15.0 App.swift -o Payload/App.app/App
         
-        # Inject custom metadata descriptors for GoRate
         cat <<EOF > Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

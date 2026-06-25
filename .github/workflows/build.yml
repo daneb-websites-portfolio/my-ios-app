@@ -19,8 +19,8 @@ jobs:
       run: |
         mkdir -p build/Payload/App.app
         
-        # Locates the correct iOS SDK paths and compiles the binary
-        xcrun --sdk iphoneos swiftc -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
+        # Added -parse-as-library to handle the @main attribute correctly
+        xcrun --sdk iphoneos swiftc -parse-as-library -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
         
         # Generates the mandatory structure file
         cat <<EOF > build/Payload/App.app/Info.plist

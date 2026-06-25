@@ -1,0 +1,39 @@
+name: Build iOS IPA
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract iOS Project
+        run: |
+          unzip ios-project.zip -d .
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Dependencies
+        run: |
+          npm install @capacitor/core @capacitor/ios
+
+      - name: Compile Unsigned iOS Build
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphoneos CODE_SIGNING_ALLOWED=NO
+
+      - name: Package Package to IPA
+        run: |
+          mkdir -p Payload
+          cp -r ios/App/build/Debug-iphoneos/App.app Payload/
+          zip -r App.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-ipa
+          path: App.ipa

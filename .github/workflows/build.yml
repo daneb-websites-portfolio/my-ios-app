@@ -15,15 +15,16 @@ jobs:
       with:
         xcode-version: latest
 
-    - name: Compile Swift Code
+    - name: Compile and Bundle App
       run: |
-        mkdir -p build/Payload/App.app
+        # 1. Create a clean payload architecture directory
+        mkdir -p Payload/App.app
         
-        # Added -parse-as-library to handle the @main attribute correctly
-        xcrun --sdk iphoneos swiftc -parse-as-library -target arm64-apple-ios14.0 App.swift -o build/Payload/App.app/App
+        # 2. Compile the binary directly inside the destination folder
+        xcrun --sdk iphoneos swiftc -parse-as-library -target arm64-apple-ios14.0 App.swift -o Payload/App.app/App
         
-        # Generates the mandatory structure file
-        cat <<EOF > build/Payload/App.app/Info.plist
+        # 3. Write the Info.plist directly into the final package location
+        cat <<EOF > Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
         <plist version="1.0">
@@ -44,10 +45,10 @@ jobs:
         </plist>
         EOF
 
-    - name: Compress into IPA Artifact
+    - name: Compress into IPA Archive
       run: |
-        cd build
-        zip -r ../CompiledApp.ipa Payload
+        # Zip from the root workspace directory to maintain absolute hierarchy
+        zip -r CompiledApp.ipa Payload
         
     - name: Upload Working IPA
       uses: actions/upload-artifact@v4

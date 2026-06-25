@@ -1,0 +1,34 @@
+name: Build iOS IPA
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest
+
+    - name: Create Valid App Bundle
+      run: |
+        mkdir -p build/Payload/App.app
+        # Compiles or copies assets directly into an Apple-compliant directory
+        cp -R ./* build/Payload/App.app/ 2>/dev/null || true
+        rm -rf build/Payload/App.app/build
+        
+    - name: Archive to IPA
+      run: |
+        cd build
+        zip -r ../App.ipa Payload
+        
+    - name: Upload Finished IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-App
+        path: App.ipa

@@ -7,7 +7,6 @@ struct ExchangeRateResponse: Decodable {
 }
 
 class CurrencyViewModel: ObservableObject {
-    // Comprehensive fallback initialization matching common global standard trading desks
     @Published var currencies: [String] = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR", "ZAR"].sorted()
     @Published var rates: [String: Double] = [:]
     @Published var isLoading = false
@@ -20,7 +19,6 @@ class CurrencyViewModel: ObservableObject {
             if let data = data, let response = try? JSONDecoder().decode(ExchangeRateResponse.self, from: data) {
                 DispatchQueue.main.async {
                     self.rates = response.conversion_rates
-                    // Extract all globally active exchange codes returned from the full tracking desk
                     self.currencies = Array(response.conversion_rates.keys).sorted()
                     self.isLoading = false
                 }
@@ -49,7 +47,7 @@ struct ConverterView: View {
 
     var body: some View {
         ZStack {
-            // Background Layer: High-vibrancy design mesh system
+            // Ambient Backdrop mesh system
             LinearGradient(colors: [Color(red: 0.11, green: 0.11, blue: 0.27), Color(red: 0.05, green: 0.05, blue: 0.10)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
             
@@ -65,7 +63,6 @@ struct ConverterView: View {
                 .frame(width: 300, height: 300)
                 .offset(x: 100, y: 200)
             
-            // Layout View Container
             VStack(spacing: 24) {
                 VStack(spacing: 4) {
                     Text("GoRate")
@@ -77,7 +74,7 @@ struct ConverterView: View {
                 }
                 .padding(.top, 40)
                 
-                // GLASS Card Architecture Matrix
+                // Frosted Glass Layer Matrix
                 VStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Amount")
@@ -96,7 +93,6 @@ struct ConverterView: View {
                     }
                     
                     HStack(spacing: 16) {
-                        // Source Picker Selection
                         VStack(alignment: .leading, spacing: 6) {
                             Text("From")
                                 .font(.caption2)
@@ -118,7 +114,6 @@ struct ConverterView: View {
                             .foregroundColor(.white.opacity(0.4))
                             .padding(.top, 16)
                         
-                        // Target Picker Selection
                         VStack(alignment: .leading, spacing: 6) {
                             Text("To")
                                 .font(.caption2)
@@ -188,7 +183,6 @@ struct ConverterView: View {
     }
 }
 
-// MARK: - App Bootloader Entry
 @main
 struct CurrencyConverterApp: App {
     var body: some Scene {

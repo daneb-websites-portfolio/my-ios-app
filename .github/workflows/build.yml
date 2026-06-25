@@ -15,15 +15,22 @@ jobs:
       with:
         xcode-version: latest
 
+    - name: Process App Icon
+      run: |
+        mkdir -p Payload/App.app
+        # If your icon image is in your repository as 2503508.png, copy it to the app bundle
+        if [ -f "2503508.png" ]; then
+          cp 2503508.png Payload/App.app/AppIcon.png
+        elif [ -f "AppIcon.png" ]; then
+          cp AppIcon.png Payload/App.app/AppIcon.png
+        fi
+
     - name: Compile and Bundle App
       run: |
-        # 1. Create a clean payload architecture directory
-        mkdir -p Payload/App.app
+        # Compile the binary with optimization flags for fluid video playback
+        xcrun --sdk iphoneos swiftc -O -parse-as-library -target arm64-apple-ios14.0 App.swift -o Payload/App.app/App
         
-        # 2. Compile the binary directly inside the destination folder
-        xcrun --sdk iphoneos swiftc -parse-as-library -target arm64-apple-ios14.0 App.swift -o Payload/App.app/App
-        
-        # 3. Write the Info.plist directly into the final package location
+        # Generate full-screen metadata configurations
         cat <<EOF > Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -32,22 +39,35 @@ jobs:
             <key>CFBundleExecutable</key>
             <string>App</string>
             <key>CFBundleIdentifier</key>
-            <string>com.ai.myiosapp</string>
+            <string>com.ai.netplay</string>
             <key>CFBundleName</key>
-            <string>MyAIApp</string>
+            <string>Netplay</string>
+            <key>CFBundleDisplayName</key>
+            <string>Netplay</string>
             <key>CFBundleShortVersionString</key>
             <string>1.0</string>
             <key>CFBundleVersion</key>
             <string>1</string>
             <key>LSRequiresIPhoneOS</key>
             <true/>
+            <key>UILaunchScreen</key>
+            <dict/>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon.png</string>
+            </array>
+            <key>UISupportedInterfaceOrientations</key>
+            <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationLandscapeLeft</string>
+                <string>UIInterfaceOrientationLandscapeRight</string>
+            </array>
         </dict>
         </plist>
         EOF
 
     - name: Compress into IPA Archive
       run: |
-        # Zip from the root workspace directory to maintain absolute hierarchy
         zip -r CompiledApp.ipa Payload
         
     - name: Upload Working IPA

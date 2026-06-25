@@ -23,13 +23,19 @@ jobs:
 
       - name: Compile App Archive
         run: |
-          cd ios/App
+          # Find where App.xcworkspace is located dynamically
+          WORKSPACE_PATH=$(find . -name "App.xcworkspace" | head -n 1)
+          PROJECT_DIR=$(dirname "$WORKSPACE_PATH")
+          echo "Found workspace at: $WORKSPACE_PATH"
+          echo "Project directory is: $PROJECT_DIR"
+          
+          cd "$PROJECT_DIR"
           xcodebuild archive \
             -workspace App.xcworkspace \
             -scheme App \
             -destination 'generic/platform=iOS' \
-            -archivePath $PWD/build/App.xcarchive \
-            -clonedSourcePackagesDirPath $PWD/build/spm \
+            -archivePath "$PWD/build/App.xcarchive" \
+            -clonedSourcePackagesDirPath "$PWD/build/spm" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -37,8 +43,11 @@ jobs:
 
       - name: Package App to IPA
         run: |
+          WORKSPACE_PATH=$(find . -name "App.xcworkspace" | head -n 1)
+          PROJECT_DIR=$(dirname "$WORKSPACE_PATH")
+          
           mkdir -p Payload
-          cp -r ios/App/build/App.xcarchive/Products/Applications/App.app Payload/
+          cp -r "$PROJECT_DIR/build/App.xcarchive/Products/Applications/App.app" Payload/
           zip -r App.ipa Payload
 
       - name: Upload IPA Artifact

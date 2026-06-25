@@ -13,6 +13,7 @@ jobs:
           mkdir -p build/App.app
           xcrun -sdk iphoneos swiftc App.swift \
             -target arm64-apple-ios15.0 \
+            -parse-as-library \
             -o build/App.app/App \
             -Xlinker -rpath -Xlinker /usr/lib/swift
             

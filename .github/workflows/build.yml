@@ -23,23 +23,23 @@ jobs:
           cd ios/App
           pod install
 
-      - name: Compile Unsigned iOS Build
+      - name: Compile Archive
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-                     -scheme App \
-                     -configuration Debug \
-                     -sdk iphoneos \
-                     -derivedDataPath build \
-                     CODE_SIGNING_ALLOWED=NO \
-                     CODE_SIGNING_REQUIRED=NO \
-                     CODE_SIGN_IDENTITY="" \
-                     PROVISIONING_PROFILE_SPECIFIER=""
+          xcodebuild archive \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -destination 'generic/platform=iOS' \
+            -archivePath $PWD/build/App.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
 
-      - name: Package Package to IPA
+      - name: Package App to IPA
         run: |
           mkdir -p Payload
-          cp -r ios/App/build/Build/Products/Debug-iphoneos/App.app Payload/
+          cp -r ios/App/build/App.xcarchive/Products/Applications/App.app Payload/
           zip -r App.ipa Payload
 
       - name: Upload IPA Artifact

@@ -24,9 +24,9 @@ jobs:
 
     - name: Compile and Bundle App
       run: |
-        # Target modified to iOS 15+ compilation flags to resolve modifier availability errors
         xcrun --sdk iphoneos swiftc -O -parse-as-library -target arm64-apple-ios15.0 App.swift -o Payload/App.app/App
         
+        # Injects explicit App Transport Security configurations to grant network socket clearance
         cat <<EOF > Payload/App.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -48,6 +48,11 @@ jobs:
             <true/>
             <key>UILaunchScreen</key>
             <dict/>
+            <key>NSAppTransportSecurity</key>
+            <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <true/>
+            </dict>
             <key>CFBundleIconFiles</key>
             <array>
                 <string>AppIcon.png</string>
